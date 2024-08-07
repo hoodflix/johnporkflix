@@ -359,165 +359,187 @@
             '37': document.getElementById('western')
         };
 
-        function showAllCategories() {
-            Object.keys(categoryContainers).forEach(category => {
-                fetchMoviesByCategory(category);
-                fetchTvShowsByCategory(category);
-            });
-        }
+// Function to show all categories on initial load
+function showAllCategories() {
+    Object.keys(categoryContainers).forEach(category => {
+        fetchMoviesByCategory(category);
+        fetchTvShowsByCategory(category);
+    });
+}
 
-        function filterCategory(categoryId) {
-            searchResults.innerHTML = ''; // Clear search results
-            searchResults.style.display = 'none'; // Hide search results
-            Object.keys(categoryContainers).forEach(id => {
-                if (id === categoryId) {
-                    categoryContainers[id].style.display = 'flex';
-                } else {
-                    categoryContainers[id].style.display = 'none';
-                }
-            });
-            fetchMoviesByCategory(categoryId);
-            fetchTvShowsByCategory(categoryId);
+// Function to filter category
+function filterCategory(categoryId) {
+    searchResults.innerHTML = ''; // Clear search results
+    searchResults.style.display = 'none'; // Hide search results
+    Object.keys(categoryContainers).forEach(id => {
+        if (id === categoryId) {
+            categoryContainers[id].style.display = 'flex';
+        } else {
+            categoryContainers[id].style.display = 'none';
         }
+    });
+    fetchMoviesByCategory(categoryId);
+    fetchTvShowsByCategory(categoryId);
+}
 
-        function fetchMoviesByCategory(categoryId) {
-            let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${categoryId}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let movies = data.results;
-                    displayMovies(categoryId, movies);
-                })
-                .catch(error => console.error('Error fetching movies:', error));
-        }
+// Function to fetch movies by category
+function fetchMoviesByCategory(categoryId) {
+    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${categoryId}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            let movies = data.results;
+            displayMovies(categoryId, movies);
+        })
+        .catch(error => console.error('Error fetching movies:', error));
+}
 
-        function fetchTvShowsByCategory(categoryId) {
-            let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&with_genres=${categoryId}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let tvShows = data.results;
-                    displayTvShows(categoryId, tvShows);
-                })
-                .catch(error => console.error('Error fetching TV shows:', error));
-        }
+// Function to fetch TV shows by category
+function fetchTvShowsByCategory(categoryId) {
+    let url = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&with_genres=${categoryId}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            let tvShows = data.results;
+            displayTvShows(categoryId, tvShows);
+        })
+        .catch(error => console.error('Error fetching TV shows:', error));
+}
 
-        function displayMovies(categoryId, movies) {
-            let container = categoryContainers[categoryId];
-            container.innerHTML = ''; // Clear the container
-            if (movies.length > 0) {
-                movies.forEach(movie => {
-                    let movieDiv = document.createElement('div');
-                    movieDiv.classList.add('result-item');
-                    movieDiv.innerHTML = `
-                        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" onclick="playMovie('${movie.id}', 'movie')" alt="${movie.title}">
-                        <p onclick="playMovie('${movie.id}', 'movie')">${movie.title}</p>
-                    `;
-                    container.appendChild(movieDiv);
-                });
-            }
-        }
-
-        function displayTvShows(categoryId, tvShows) {
-            let container = categoryContainers[categoryId];
-            container.innerHTML = ''; // Clear the container
-            if (tvShows.length > 0) {
-                tvShows.forEach(show => {
-                    let showDiv = document.createElement('div');
-                    showDiv.classList.add('result-item');
-                    showDiv.innerHTML = `
-                        <img src="https://image.tmdb.org/t/p/w500${show.poster_path}" onclick="playMovie('${show.id}', 'tv')" alt="${show.name}">
-                        <p onclick="playMovie('${show.id}', 'tv')">${show.name}</p>
-                    `;
-                    container.appendChild(showDiv);
-                });
-            }
-        }
-
-        function playMovie(id, type) {
-            let url = type === 'movie' ? `https://vidsrc.me/embed/movie/${id}` : `https://vidsrc.me/embed/tv/${id}`;
-            videoContainer.innerHTML = `<iframe src="${url}" frameborder="0" allowfullscreen></iframe>`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function searchMovies(query) {
-            let url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${query}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let results = data.results;
-                    displaySearchResults(results);
-                })
-                .catch(error => console.error('Error searching movies:', error));
-        }
-
-        function displaySearchResults(results) {
-            searchResultsContainer.innerHTML = ''; // Clear previous results
-            if (results.length > 0) {
-                results.forEach(result => {
-                    let resultDiv = document.createElement('div');
-                    resultDiv.classList.add('search-result');
-                    if (result.media_type === 'movie') {
-                        resultDiv.innerHTML = `
-                            <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" onclick="playMovie('${result.id}', 'movie')" alt="${result.title}">
-                            <p onclick="playMovie('${result.id}', 'movie')">${result.title}</p>
-                        `;
-                    } else if (result.media_type === 'tv') {
-                        resultDiv.innerHTML = `
-                            <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" onclick="playMovie('${result.id}', 'tv')" alt="${result.name}">
-                            <p onclick="playMovie('${result.id}', 'tv')">${result.name}</p>
-                        `;
-                    }
-                    searchResultsContainer.appendChild(resultDiv);
-                });
-            }
-        }
-
-        function toggleSearchScreen() {
-            if (searchScreen.style.display === 'none') {
-                searchScreen.style.display = 'flex';
-            } else {
-                searchScreen.style.display = 'none';
-            }
-        }
-
-        function typeKey(key) {
-            searchInput.value += key;
-            searchMovies(searchInput.value);
-        }
-
-        function deleteKey() {
-            searchInput.value = '';
-            searchResultsContainer.innerHTML = '';
-        }
-
-        function backspaceKey() {
-            searchInput.value = searchInput.value.slice(0, -1);
-            searchMovies(searchInput.value);
-        }
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                searchScreen.style.display = 'none';
-            }
+// Function to display movies
+function displayMovies(categoryId, movies) {
+    let container = categoryContainers[categoryId];
+    container.innerHTML = ''; // Clear the container
+    if (movies.length > 0) {
+        movies.forEach(movie => {
+            let movieDiv = document.createElement('div');
+            movieDiv.classList.add('result-item');
+            movieDiv.innerHTML = `
+                <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" onclick="playMovie('${movie.id}', 'movie')" alt="${movie.title}">
+                <p onclick="playMovie('${movie.id}', 'movie')">${movie.title}</p>
+            `;
+            container.appendChild(movieDiv);
         });
+    }
+}
 
-        function updateVisitCount() {
-            let visitCount = localStorage.getItem('visitCount');
-            if (!visitCount) {
-                visitCount = 0;
+// Function to display TV shows
+function displayTvShows(categoryId, tvShows) {
+    let container = categoryContainers[categoryId];
+    container.innerHTML = ''; // Clear the container
+    if (tvShows.length > 0) {
+        tvShows.forEach(show => {
+            let showDiv = document.createElement('div');
+            showDiv.classList.add('result-item');
+            showDiv.innerHTML = `
+                <img src="https://image.tmdb.org/t/p/w500${show.poster_path}" onclick="playMovie('${show.id}', 'tv')" alt="${show.name}">
+                <p onclick="playMovie('${show.id}', 'tv')">${show.name}</p>
+            `;
+            container.appendChild(showDiv);
+        });
+    }
+}
+
+// Function to play movie or TV show
+function playMovie(id, type) {
+    let url = type === 'movie' ? `https://vidsrc.me/embed/movie/${id}` : `https://vidsrc.me/embed/tv/${id}`;
+    videoContainer.innerHTML = `<iframe src="${url}" frameborder="0" allowfullscreen></iframe>`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Function to search movies and TV shows
+function searchMovies(query) {
+    let url = `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${query}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            let results = data.results;
+            displaySearchResults(results);
+        })
+        .catch(error => console.error('Error searching movies:', error));
+}
+
+// Function to display search results
+function displaySearchResults(results) {
+    searchResultsContainer.innerHTML = ''; // Clear previous results
+    if (results.length > 0) {
+        results.forEach(result => {
+            let resultDiv = document.createElement('div');
+            resultDiv.classList.add('search-result');
+            if (result.media_type === 'movie') {
+                resultDiv.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" onclick="playMovie('${result.id}', 'movie')" alt="${result.title}">
+                    <p onclick="playMovie('${result.id}', 'movie')">${result.title}</p>
+                `;
+            } else if (result.media_type === 'tv') {
+                resultDiv.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/w500${result.poster_path}" onclick="playMovie('${result.id}', 'tv')" alt="${result.name}">
+                    <p onclick="playMovie('${result.id}', 'tv')">${result.name}</p>
+                `;
             }
-            visitCount++;
-            localStorage.setItem('visitCount', visitCount);
-            document.getElementById('visit-count').innerText = `Visit count: ${visitCount}`;
-        }
+            searchResultsContainer.appendChild(resultDiv);
+        });
+    }
+}
 
-        updateVisitCount();
-        showAllCategories(); // Show all categories on initial load
+// Function to toggle search screen
+function toggleSearchScreen() {
+    if (searchScreen.style.display === 'none') {
+        searchScreen.style.display = 'flex';
+    } else {
+        searchScreen.style.display = 'none';
+    }
+}
+
+// Function to handle typing a key
+function typeKey(key) {
+    searchInput.value += key;
+    searchInput.focus();
+    searchMovies(searchInput.value);
+}
+
+// Function to delete the search input
+function deleteKey() {
+    searchInput.value = '';
+    searchResultsContainer.innerHTML = '';
+    searchInput.focus();
+}
+
+// Function to handle backspace key
+function backspaceKey() {
+    searchInput.value = searchInput.value.slice(0, -1);
+    searchInput.focus();
+    searchMovies(searchInput.value);
+}
+
+// Event listener for keydown events
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        searchScreen.style.display = 'none';
+    } else if (event.key.length === 1) {
+        event.preventDefault();
+        searchInput.value += event.key;
+        searchMovies(searchInput.value);
+    } else if (event.key === 'Backspace') {
+        event.preventDefault();
+        searchInput.value = searchInput.value.slice(0, -1);
+        searchMovies(searchInput.value);
+    }
+});
+
+// Function to update visit count
+function updateVisitCount() {
+    let visitCount = localStorage.getItem('visitCount');
+    if (!visitCount) {
+        visitCount = 0;
+    }
+    visitCount++;
+    localStorage.setItem('visitCount', visitCount);
+    document.getElementById('visit-count').innerText = `Visit count: ${visitCount}`;
+}
+
+updateVisitCount();
+showAllCategories(); // Show all categories on initial load
     </script>
 </body>
 </html>
-
-
-
-
